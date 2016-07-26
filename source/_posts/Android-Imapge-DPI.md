@@ -1,7 +1,7 @@
 ---
 title: Android Imapge DPI
 date: 2016-05-29 15:53:09
-tags:
+tags: Android-Develop, Image
 ---
 ## 安卓 ImageView 的默认 DPI 问题
 因为最近在弄 Excited BBS，在设置开始画面的时候发现渲染的图像分辨率超过 OpenGl 的上限(2400*4800), 搜索一番之后发现是图片的默认 DPI 问题，在
