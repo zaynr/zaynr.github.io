@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 _Store
 Thumbs.db
 db.json
@@ -5,3 +6,10 @@ db.json
 node_modules/
 public/
 .deploy*/%
+=======
+/.deploy_git
+/public  
+/node_modules
+/db.json
+./public
+>>>>>>> 190c40e0e5bd57d19869d88579700e4da8a931c6
