@@ -36,7 +36,7 @@ $ hexo init blog
 ```bash
 $ git clone -b source git@github.com:change2hao:change2hao.github.io.git
 $ npm install //根据package.json来下载依赖包
-```bash
+```
 这样把远程仓库的source分支克隆下来，然后安装依赖包。接下来我们就可以继续写博客了
 
 ```bash
