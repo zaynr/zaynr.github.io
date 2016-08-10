@@ -1,7 +1,7 @@
 ---
 title: ubuntu命令行源代理设置
 date: 2016-08-02 22:09:53
-tags:
+tags: [linux, 科学上网]
 ---
 使用科学上网工具时,因为在 linux 下不能直接在 shadowsocks 的 gui 里直接设置全局代理,需要在浏览器中添加代理插件走 localhost:1080,这样有点麻烦.在 Ubuntu 里的 Terminal 里如果要用代理来翻墙 apt-get, 可以使用:
 ```bash
