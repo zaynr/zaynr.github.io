@@ -2,6 +2,7 @@
 title: Spring MVC 学习笔记
 date: 2016-08-09 20:20:38
 tags: [web, java]
+category: [学习笔记]
 ---
 其实我现在学习的 Spring MVC 并不是原生的，而是公司魔改版本的 JRES 系列框架。里面的坑之多简直丧心病狂。首先就是配置工程。公司里使用的 IDE 为 Eclipse LUNA，JDK 版本为 1.7。
 <!--more-->
