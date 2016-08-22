@@ -58,6 +58,16 @@ $data.Request.ServerName
 ## is the same as
 ${data.Request.ServerName}
 ```
+而从 Java 向 Velocity 传参时, 则使用 ModelMap:
+```java
+@RequestMapping("/test/test")
+	public void test(ModelMap modelMap){
+		test = new ConnectTestDTO();
+		test.setRemark("test");
+		modelMap.put("foo", test);
+	}
+```
+此时则向 model 中放入了键为 foo, 值为 test 的 ConnectTestDTO 对象.
 ## 指令
 ---
 VTL 里的指令也就相当于是内置函数了, 以下是几个常见指令:
