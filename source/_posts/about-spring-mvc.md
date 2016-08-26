@@ -341,3 +341,53 @@ jres.action.scan=zengzy.test`
 TODO：
 目前只知道将编写好之后的 Web 项目 Export 为 *.war 包，然后扔到服务器上 Tomcat 目录下的 webapps 文件夹中，访问方式为：domain:8080/war-name/folder/test.htm。folder 即为 WEB-INF/screen/folder。
 混合 Nginx 与 Tomcat，让 Nginx 进行反向代理仍需学习。
+## 利用 JSON 让 Java 与 JavaScript 交互
+首先是 Java 后端代码:
+```java
+@Controller
+@RequestMapping("/pub/entrust")
+public class EntrustQueryController {
+	@Autowired
+	private EntrustServices entrustService;
+
+	@RequestMapping("/entrust-query")
+	public void entrustQuery(ModelMap modelMap, HttpServletRequest request) {
+		modelMap.put("siteName", "委托查询|O++交易系统");
+	}
+	
+	@RequestMapping(value = "/date.json")
+	@ResponseBody
+	public Map<String, Object> getDateArr(HttpServletRequest request){
+		EntrustQueryRequest queryRequest = new EntrustQueryRequest();
+		Map<String, Object> map = new HashMap<String, Object>();
+		
+		queryRequest.setBeginDate(request.getParameter("startDate").replace("-", ""));
+		queryRequest.setEndDate(request.getParameter("endDate").replace("-", ""));
+		EntrustQueryResponse response = entrustService.entrustQuery(queryRequest);
+		map.put("tableContent", response.getRows());
+		map.put("rowCount", response.getRowCount());
+		return map;
+	}
+}
+```
+然后是 JavaScript 前端代码:
+```javascript
+$("#query").click(function(){
+        var startDate = $("input[name='startDate']").val();
+        var endDate = $("input[name='endDate']").val();
+        var dateArr = startDate > endDate ? [endDate, startDate] : [startDate, endDate];
+        $.post("${appServer}/pub/entrust/date.json",
+            {
+                startDate: dateArr[0],
+                endDate: dateArr[1]
+            },
+            function(data){
+                for(var i = 0; i < data.rowCount; i++){
+                  //actions
+                }
+            }
+        );
+        //actions
+    }
+```
+说的简单点, 就是 JavaScript 利用 JQuery 的 `$.post` 方法与后端的 Java 交互, Java 向前端发参数时需要在法参数的函数上加个 `@ResponseBody`, 否则 JavaScript 获取参数会遇到 404.
