@@ -22,7 +22,7 @@ category: [解题报告]
 
 该题我本来想用类似于动态规划的方法来解, 即令创建一个 Count 数组来存储从数组开头移动到对应 index 的步数, 初始值赋为 `INT_MAX`, 从头开始遍历, 范围是 `[index, index + array[index] > array.size() ? index + array[index]:array.size()]`. 时间复杂度最坏情况下为 O(n²), 自然超时了.
 
-后来机智的我想到了, 既然 index 位的数字已经赋予之后位的数字步数了, 如果已经被赋值之后位的数字的最大步长仍然无法'接触'到未赋值的的位, 则必然比原来的步长小. 类似于 `[index....[index2 ...]..]` 这样的包含状态, 可以很明显地看出, 若对 index2 进行步数遍历, index2 范围内的步数必然大于 index 范围内的步数. 所以此时可以直接 break, 不用管 index2 范围内的了. 此时将 Count 数组初始值赋为 0, 若 `Count[index + (index + array[index] < array.size() ? array[index]:(array.size() - index - 1))] != 0`, 则表明此时 index 被包含在了之前的已经遍历过了的范围内, 直接跳出循环, 进行下位的范围遍历.
+后来机智的我想到了, 既然 index 位的数字已经赋予之后位的数字步数了, 如果已经被赋值之后位的数字的最大步长仍然无法'接触'到未赋值的的位, 则必然比原来的步长小. 类似于 `[index....[index2 ...]..]` 这样的包含状态, 可以很明显地看出, 若对 index2 进行步数遍历, index2 范围内的步数必然大于 index 范围内的步数. 所以此时可以直接 break, 不用管 index2 范围内的了. 此时将 Count 数组初始值赋为 0, 若 `Count[index + (index + array[index] < array.size() ? array[index]:(array.size() - index - 1))] != 0`, 则表明此时 index 被包含在了之前的已经遍历过了的范围内, 直接跳出循环, 进行下位的范围遍历. 此时的时间复杂度为 O(n).
 
 以下为代码:
 ```cpp
