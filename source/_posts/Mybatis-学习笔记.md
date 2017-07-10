@@ -8,7 +8,7 @@ MyBatis 是支持定制化 SQL、存储过程以及高级映射的优秀的持�
 
 <!--more-->
 
-# 配置 xml 文件
+# 完成基本的获取数据操作
 Mybatis 可以通过 XML 文件快捷地创建 SqlSessionFactory，所以我们先配置 XML 文件可以方便之后对于数据库的操作，下面是一个 config.xml 文件的模板。
 ```xml
 <?xml version="1.0" encoding="UTF-8" ?>
