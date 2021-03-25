@@ -1,12 +1,28 @@
 ---
 title: C++ POD 内存操作
-date: 2021-02-24 22:18:35
+date: 2020-02-24 22:18:35
 tags:
 ---
 
 C++ 在涉及到网络编程情况下，一般操作是在一个 header 里带上 attachment 的长度，再分配一个对应长度的 buffer 接收 attachment。但是一些情况下，无法预先分配一个恰到好处的 buffer 来接收数据，比如使用 curl 时。所以需要对不同的 buffer 操作方式进行比较，从而得出最佳操作的方式。
 
 以下 benchmark 是对一个 2mb 的内存块操作。
+
+```s
+硬件概览：
+  型号名称：	MacBook Pro
+  型号标识符：	MacBookPro15,4
+  处理器名称：	四核Intel Core i5
+  处理器速度：	1.4 GHz
+  处理器数目：	1
+  核总数：	4
+  L2缓存（每个核）：	256 KB
+  L3缓存：	6 MB
+  超线程技术：	已启用
+  内存：	8 GB
+  系统固件版本：	1554.80.3.0.0 (iBridge: 18.16.14347.0.0,0)
+  激活锁状态：	已启用
+```
 
 ## memset vs std::fill
 
@@ -15,7 +31,7 @@ memset 是 asm 内嵌的操作，而 std::fill 是一个模版壳子的 for 循�
 
 |           | memset | std::fill |
 | --------- | ------ | --------- |
-| 1000 次 | 341ms | 17323ms    |
+| 1000 次   | 341ms  | 17323ms    |
 
 ## memcpy vs std::copy
 
@@ -26,7 +42,6 @@ std::copy 的内部实现其实就是 memcpy/memmove, 所以性能差距不会�
 |           | memcpy | std::copy |
 | --------- | ------ | --------- |
 | 100000 次 | 1184ms | 1175ms    |
-
 
 
 ## 实际操作
