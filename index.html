@@ -591,7 +591,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-04-01 23:22:26" itemprop="dateModified" datetime="2021-04-01T23:22:26+08:00">2021-04-01</time>
+                <time title="Modified: 2021-04-01 23:24:05" itemprop="dateModified" datetime="2021-04-01T23:24:05+08:00">2021-04-01</time>
               </span>
 
           
@@ -618,6 +618,7 @@
 <h2 id="atomic"><a href="#atomic" class="headerlink" title="atomic"></a>atomic</h2><h3 id="bus-加锁"><a href="#bus-加锁" class="headerlink" title="bus 加锁"></a>bus 加锁</h3><p>一个 lock# 信号，expensive。其他核也不能用了。</p>
 <h3 id="cache-加锁"><a href="#cache-加锁" class="headerlink" title="cache 加锁"></a>cache 加锁</h3><p>锁 cache line，需要处理器支持。</p>
 <h2 id="memory-barrier"><a href="#memory-barrier" class="headerlink" title="memory barrier"></a>memory barrier</h2><p>一个 lock-free 的 ringbuffer，对于 write_index 和 read_index 的更新。每次往里写数据与更新 write_index，可能被优化为乱序执行，先把 write_index 给更新了再写数据，导致读取到了错误的东西。</p>
+<p>这种乱序执行，编译器优化、CPU 流水线重排都会导致它的产生，这时候就需要 memory barrier 进行辅助。</p>
 <h2 id="CAS"><a href="#CAS" class="headerlink" title="CAS"></a>CAS</h2><p>最经典的 ABA 问题。</p>
 
       
