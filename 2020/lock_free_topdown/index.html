@@ -28,7 +28,7 @@
 <meta property="og:description" content="lock free 作为性能控们眼中的弄潮儿技术，自然是有着让人难以抗拒的性能魅力。 但是在讨论 lock free 之前，我们先来大概看看 lock 吧。毕竟没有对比，就没有对性能的概念。 spin lockspin lock 会在一个死循环内反复尝试，直到拿到锁为止。优点：如果获取不到锁，也不会陷入内核态。不会响应中断。缺点：CPU 占用极高。这种锁一般用在 log 模块内，向 log buf">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2020-02-05T08:08:01.000Z">
-<meta property="article:modified_time" content="2021-03-31T11:12:56.925Z">
+<meta property="article:modified_time" content="2021-04-01T15:22:26.697Z">
 <meta property="article:author" content="Zengyu Zeng">
 <meta name="twitter:card" content="summary">
 
@@ -180,7 +180,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-03-31 19:12:56" itemprop="dateModified" datetime="2021-03-31T19:12:56+08:00">2021-03-31</time>
+                <time title="Modified: 2021-04-01 23:22:26" itemprop="dateModified" datetime="2021-04-01T23:22:26+08:00">2021-04-01</time>
               </span>
 
           
@@ -204,7 +204,11 @@
 <h2 id="性能比较"><a href="#性能比较" class="headerlink" title="性能比较"></a>性能比较</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">硬件概览：</span><br><span class="line">  型号名称：	MacBook Pro</span><br><span class="line">  型号标识符：	MacBookPro15,4</span><br><span class="line">  处理器名称：	四核Intel Core i5</span><br><span class="line">  处理器速度：	1.4 GHz</span><br><span class="line">  处理器数目：	1</span><br><span class="line">  核总数：	4</span><br><span class="line">  L2缓存（每个核）：	256 KB</span><br><span class="line">  L3缓存：	6 MB</span><br><span class="line">  超线程技术：	已启用</span><br><span class="line">  内存：	8 GB</span><br><span class="line">  系统固件版本：	1554.80.3.0.0 (iBridge: 18.16.14347.0.0,0)</span><br><span class="line">  激活锁状态：	已启用</span><br></pre></td></tr></table></figure>
 <p>使用以上介绍的几种锁，开启 4 个线程，对同一个 stack 进行 push、pop 操作，获取其吞吐量。</p>
 <h3 id="1-push-3-pop"><a href="#1-push-3-pop" class="headerlink" title="1 push, 3 pop"></a>1 push, 3 pop</h3><p>在使用 rwlock 时，对这种场景的性能测试没有什么意义。</p>
-<h2 id="atomic"><a href="#atomic" class="headerlink" title="atomic"></a>atomic</h2><h2 id="memory-barrier"><a href="#memory-barrier" class="headerlink" title="memory barrier"></a>memory barrier</h2><h2 id="CAS"><a href="#CAS" class="headerlink" title="CAS"></a>CAS</h2>
+<h2 id="atomic"><a href="#atomic" class="headerlink" title="atomic"></a>atomic</h2><h3 id="bus-加锁"><a href="#bus-加锁" class="headerlink" title="bus 加锁"></a>bus 加锁</h3><p>一个 lock# 信号，expensive。其他核也不能用了。</p>
+<h3 id="cache-加锁"><a href="#cache-加锁" class="headerlink" title="cache 加锁"></a>cache 加锁</h3><p>锁 cache line，需要处理器支持。</p>
+<h2 id="memory-barrier"><a href="#memory-barrier" class="headerlink" title="memory barrier"></a>memory barrier</h2><p>一个 lock-free 的 ringbuffer，对于 write_index 和 read_index 的更新。每次往里写数据与更新 write_index，可能被优化为乱序执行，先把 write_index 给更新了再写数据，导致读取到了错误的东西。</p>
+<h2 id="CAS"><a href="#CAS" class="headerlink" title="CAS"></a>CAS</h2><p>最经典的 ABA 问题。</p>
+
     </div>
 
     
@@ -284,7 +288,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#spin-lock"><span class="nav-number">1.</span> <span class="nav-text">spin lock</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#semaphore"><span class="nav-number">2.</span> <span class="nav-text">semaphore</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mutex-lock"><span class="nav-number">3.</span> <span class="nav-text">mutex lock</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#recursive-lock"><span class="nav-number">4.</span> <span class="nav-text">recursive lock</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#rwlock"><span class="nav-number">5.</span> <span class="nav-text">rwlock</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%A7%E8%83%BD%E6%AF%94%E8%BE%83"><span class="nav-number">6.</span> <span class="nav-text">性能比较</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-push-3-pop"><span class="nav-number">6.1.</span> <span class="nav-text">1 push, 3 pop</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#atomic"><span class="nav-number">7.</span> <span class="nav-text">atomic</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#memory-barrier"><span class="nav-number">8.</span> <span class="nav-text">memory barrier</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CAS"><span class="nav-number">9.</span> <span class="nav-text">CAS</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#spin-lock"><span class="nav-number">1.</span> <span class="nav-text">spin lock</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#semaphore"><span class="nav-number">2.</span> <span class="nav-text">semaphore</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mutex-lock"><span class="nav-number">3.</span> <span class="nav-text">mutex lock</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#recursive-lock"><span class="nav-number">4.</span> <span class="nav-text">recursive lock</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#rwlock"><span class="nav-number">5.</span> <span class="nav-text">rwlock</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%A7%E8%83%BD%E6%AF%94%E8%BE%83"><span class="nav-number">6.</span> <span class="nav-text">性能比较</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-push-3-pop"><span class="nav-number">6.1.</span> <span class="nav-text">1 push, 3 pop</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#atomic"><span class="nav-number">7.</span> <span class="nav-text">atomic</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#bus-%E5%8A%A0%E9%94%81"><span class="nav-number">7.1.</span> <span class="nav-text">bus 加锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#cache-%E5%8A%A0%E9%94%81"><span class="nav-number">7.2.</span> <span class="nav-text">cache 加锁</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#memory-barrier"><span class="nav-number">8.</span> <span class="nav-text">memory barrier</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CAS"><span class="nav-number">9.</span> <span class="nav-text">CAS</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 

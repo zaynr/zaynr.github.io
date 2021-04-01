@@ -176,7 +176,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-03-31 21:09:15" itemprop="dateModified" datetime="2021-03-31T21:09:15+08:00">2021-03-31</time>
+                <time title="Modified: 2021-04-01 23:19:38" itemprop="dateModified" datetime="2021-04-01T23:19:38+08:00">2021-04-01</time>
               </span>
 
           
@@ -210,13 +210,13 @@
 <p>当然，能避免频繁的 sys call 最好还是避免掉，举个例子。</p>
 <h3 id="记录耗时惹出的事"><a href="#记录耗时惹出的事" class="headerlink" title="记录耗时惹出的事"></a>记录耗时惹出的事</h3><p>比如：<code>gettimeofday()</code>，这个调用好像很多人没想到是一个 sys call。在一些性能敏感的场景里，例如对一张图片提取特征的耗时，会在多处打桩，以避免出现返回慢等问题时像无头苍蝇一样乱找。对于 c++，std::chrono 或者 gettimeofday 其实差异不大，都是一个 sys call，获取系统时间。</p>
 <p>但是在高并发场景下，每秒几千几万张的图片送进来，打桩时频繁获取时间则成了一个很重的负担。这也是知道了结论以后的倒推，通过 perf 只能看到是在频繁获取时间，日志、打桩、染色 id 等场景都会涉及到时间的获取。只有在打桩的时候，才会持续的去获取时间戳，记录耗时。</p>
-<p>既然知道是频繁的获取时间导致的性能问题，那么我们就把获取时间戳的这个行为从 sys call 降级为一个用户态的事情：单独起一个线程，通过 nanosleep（纳秒） 来获取精确到毫秒的时间戳。atomic + volatile，这两板斧下去，就把打桩的 sys call 成功降级为了一个 atoimc get。更进一步，其实这个时间戳只有一个 setter，多个 reader，只要更新频率够得上需要的精度，没有必要再包上一层 atomic。既然封装出了一个用户态时间获取，其他获取时间的场景也都可复用这个线程的数据。</p>
+<p>既然知道是频繁的获取时间导致的性能问题，那么我们就把获取时间戳的这个行为从 sys call 降级为一个用户态的事情：单独起一个线程，通过 nanosleep（纳秒） 来获取精确到毫秒的时间戳。atomic 这板斧下去，就把打桩的 sys call 成功降级为了一个 atoimc get。更进一步，其实这个时间戳只有一个 setter，多个 reader，只要更新频率够得上需要的精度，没有必要再包上一层 atomic。这里也存在一个多核缓存不同步的问题，如果想保证其每次读取都是正确的话，就是 atomic（或对齐） + volatile 两板斧。既然封装出了一个用户态时间获取，其他获取时间的场景也都可复用这个线程的数据。</p>
 <p>当然，这个实现也有一个很明显的问题：太占 CPU 了。在 HPC 里，一个机器 64 或者 86 个核，这种单开一个线程没什么影响，但是要是移动端呢？</p>
 <h2 id="内存"><a href="#内存" class="headerlink" title="内存"></a>内存</h2><p>现在的机器内存一般不会成为瓶颈。对于 C++，内存可优化的点一个是避免传参数时的隐式复制，一个就是避免过多的 cache miss。</p>
 <h3 id="隐式复制"><a href="#隐式复制" class="headerlink" title="隐式复制"></a>隐式复制</h3><p>没什么好说的，传参数的时候多用<strong>引用</strong>和<strong>指针</strong>吧。最好少用指针，因为你可能会忘了写判空，不知道什么时候就跑飞了。</p>
 <p>更严重的是，经常有人上层做一个 vector 或者 shared_ptr，避免内存泄漏。但是下层接数据的函数参数又给写成了指针。那么传的时候，要么 vector.data()，要么 shared_ptr.get()。最后，一层层传下去的这个指针，指向的类早就析构掉了，而某个异步的回调还在用。这个指针指向的堆内存，可能还不会马上被其他 malloc 用掉，在一小段时间内是合法的，跑了一会儿后才飞掉。碰上这种垃圾代码导致的问题，自求多福吧。</p>
 <h3 id="降不下来的内存"><a href="#降不下来的内存" class="headerlink" title="降不下来的内存"></a>降不下来的内存</h3><p>内存碎片，是 libc 里的 ptmalloc 导致的。libc 的内存管理是 brk，把堆指针往上推，然后再从裸堆里分配内存给用户。如果最上面的内存还没被释放，又有新的请求进来，下面的空隙也塞不进这个请求的话，只能继续往上推，导致进程里 malloc 申请的内存和 Rss 实际占用的内存对不上，Rss 明显高于 malloc 申请的数量。解决方案自然是，要么换一个 malloc 实现，要么调优 ptmalloc 的参数。或者不用 malloc，直接用 mmap 来申请大块内存，自己做内存池。</p>
-<h3 id="cache-miss"><a href="#cache-miss" class="headerlink" title="cache miss"></a>cache miss</h3><p>在 perf 里面，一堆的 page fault 会直接把你程序的性能给拉下来。</p>
+<h3 id="cache-miss"><a href="#cache-miss" class="headerlink" title="cache miss"></a>cache miss</h3><p>在 perf 里面，一堆的物理内存 page fault 会直接把你程序的性能给拉下来。而到了 CPU cache 这个级别，cache line 一个 invalid 脏读驱逐也会影响到其他核的读取。</p>
 <h2 id="IO"><a href="#IO" class="headerlink" title="IO"></a>IO</h2><p>当涉及到 IO，很多东西就显得无趣起来了。一样，举个例子吧。</p>
 <h3 id="NON-BLOCKING"><a href="#NON-BLOCKING" class="headerlink" title="NON_BLOCKING"></a>NON_BLOCKING</h3><p>一开始，之前的老哥用现成的 libuv 来实现一个 http server，做一个特征提取服务。会有很多的 client 向 server 发起链接，发送一张图片后，server 对图片提取特征再返回给 client。起了若干个 worker 线程，经典的 one thread per connection，从 server socket 里捞链接出来读图片、提取特征、再返回。</p>
 <p>但是性能很差。</p>
@@ -591,7 +591,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-03-31 19:12:56" itemprop="dateModified" datetime="2021-03-31T19:12:56+08:00">2021-03-31</time>
+                <time title="Modified: 2021-04-01 23:22:26" itemprop="dateModified" datetime="2021-04-01T23:22:26+08:00">2021-04-01</time>
               </span>
 
           
@@ -615,7 +615,11 @@
 <h2 id="性能比较"><a href="#性能比较" class="headerlink" title="性能比较"></a>性能比较</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">硬件概览：</span><br><span class="line">  型号名称：	MacBook Pro</span><br><span class="line">  型号标识符：	MacBookPro15,4</span><br><span class="line">  处理器名称：	四核Intel Core i5</span><br><span class="line">  处理器速度：	1.4 GHz</span><br><span class="line">  处理器数目：	1</span><br><span class="line">  核总数：	4</span><br><span class="line">  L2缓存（每个核）：	256 KB</span><br><span class="line">  L3缓存：	6 MB</span><br><span class="line">  超线程技术：	已启用</span><br><span class="line">  内存：	8 GB</span><br><span class="line">  系统固件版本：	1554.80.3.0.0 (iBridge: 18.16.14347.0.0,0)</span><br><span class="line">  激活锁状态：	已启用</span><br></pre></td></tr></table></figure>
 <p>使用以上介绍的几种锁，开启 4 个线程，对同一个 stack 进行 push、pop 操作，获取其吞吐量。</p>
 <h3 id="1-push-3-pop"><a href="#1-push-3-pop" class="headerlink" title="1 push, 3 pop"></a>1 push, 3 pop</h3><p>在使用 rwlock 时，对这种场景的性能测试没有什么意义。</p>
-<h2 id="atomic"><a href="#atomic" class="headerlink" title="atomic"></a>atomic</h2><h2 id="memory-barrier"><a href="#memory-barrier" class="headerlink" title="memory barrier"></a>memory barrier</h2><h2 id="CAS"><a href="#CAS" class="headerlink" title="CAS"></a>CAS</h2>
+<h2 id="atomic"><a href="#atomic" class="headerlink" title="atomic"></a>atomic</h2><h3 id="bus-加锁"><a href="#bus-加锁" class="headerlink" title="bus 加锁"></a>bus 加锁</h3><p>一个 lock# 信号，expensive。其他核也不能用了。</p>
+<h3 id="cache-加锁"><a href="#cache-加锁" class="headerlink" title="cache 加锁"></a>cache 加锁</h3><p>锁 cache line，需要处理器支持。</p>
+<h2 id="memory-barrier"><a href="#memory-barrier" class="headerlink" title="memory barrier"></a>memory barrier</h2><p>一个 lock-free 的 ringbuffer，对于 write_index 和 read_index 的更新。每次往里写数据与更新 write_index，可能被优化为乱序执行，先把 write_index 给更新了再写数据，导致读取到了错误的东西。</p>
+<h2 id="CAS"><a href="#CAS" class="headerlink" title="CAS"></a>CAS</h2><p>最经典的 ABA 问题。</p>
+
       
     </div>
 
