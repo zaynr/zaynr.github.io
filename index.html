@@ -176,7 +176,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-04-01 23:19:38" itemprop="dateModified" datetime="2021-04-01T23:19:38+08:00">2021-04-01</time>
+                <time title="Modified: 2021-04-01 23:46:36" itemprop="dateModified" datetime="2021-04-01T23:46:36+08:00">2021-04-01</time>
               </span>
 
           
@@ -216,7 +216,9 @@
 <h3 id="隐式复制"><a href="#隐式复制" class="headerlink" title="隐式复制"></a>隐式复制</h3><p>没什么好说的，传参数的时候多用<strong>引用</strong>和<strong>指针</strong>吧。最好少用指针，因为你可能会忘了写判空，不知道什么时候就跑飞了。</p>
 <p>更严重的是，经常有人上层做一个 vector 或者 shared_ptr，避免内存泄漏。但是下层接数据的函数参数又给写成了指针。那么传的时候，要么 vector.data()，要么 shared_ptr.get()。最后，一层层传下去的这个指针，指向的类早就析构掉了，而某个异步的回调还在用。这个指针指向的堆内存，可能还不会马上被其他 malloc 用掉，在一小段时间内是合法的，跑了一会儿后才飞掉。碰上这种垃圾代码导致的问题，自求多福吧。</p>
 <h3 id="降不下来的内存"><a href="#降不下来的内存" class="headerlink" title="降不下来的内存"></a>降不下来的内存</h3><p>内存碎片，是 libc 里的 ptmalloc 导致的。libc 的内存管理是 brk，把堆指针往上推，然后再从裸堆里分配内存给用户。如果最上面的内存还没被释放，又有新的请求进来，下面的空隙也塞不进这个请求的话，只能继续往上推，导致进程里 malloc 申请的内存和 Rss 实际占用的内存对不上，Rss 明显高于 malloc 申请的数量。解决方案自然是，要么换一个 malloc 实现，要么调优 ptmalloc 的参数。或者不用 malloc，直接用 mmap 来申请大块内存，自己做内存池。</p>
-<h3 id="cache-miss"><a href="#cache-miss" class="headerlink" title="cache miss"></a>cache miss</h3><p>在 perf 里面，一堆的物理内存 page fault 会直接把你程序的性能给拉下来。而到了 CPU cache 这个级别，cache line 一个 invalid 脏读驱逐也会影响到其他核的读取。</p>
+<h3 id="cache-miss"><a href="#cache-miss" class="headerlink" title="cache miss"></a>cache miss</h3><p>在 perf 里面，一堆的物理内存 page fault 会直接把你程序的性能给拉下来。而到了 CPU cache 这个级别，cache line 一个 invalid 脏读驱逐也会影响到其他核的读取。比如，两个线程同时操作两个很相近的变量，你我此起彼伏的互相 invalid 对方核的 cache line，就会导致性能暴跌。解决也很简单：不让变量靠在一起就行了。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// really slow when concurrency</span></span><br><span class="line"><span class="keyword">int32_t</span> task001;</span><br><span class="line"><span class="keyword">int32_t</span> task002;</span><br></pre></td></tr></table></figure>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// avoided invaliding cache line each other</span></span><br><span class="line"><span class="keyword">int32_t</span> task001 __attribute__ ((aligned(<span class="number">64</span>)));</span><br><span class="line"><span class="keyword">int32_t</span> task002 __attribute__ ((aligned(<span class="number">64</span>)));</span><br></pre></td></tr></table></figure>
 <h2 id="IO"><a href="#IO" class="headerlink" title="IO"></a>IO</h2><p>当涉及到 IO，很多东西就显得无趣起来了。一样，举个例子吧。</p>
 <h3 id="NON-BLOCKING"><a href="#NON-BLOCKING" class="headerlink" title="NON_BLOCKING"></a>NON_BLOCKING</h3><p>一开始，之前的老哥用现成的 libuv 来实现一个 http server，做一个特征提取服务。会有很多的 client 向 server 发起链接，发送一张图片后，server 对图片提取特征再返回给 client。起了若干个 worker 线程，经典的 one thread per connection，从 server socket 里捞链接出来读图片、提取特征、再返回。</p>
 <p>但是性能很差。</p>
@@ -591,7 +593,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-04-01 23:24:05" itemprop="dateModified" datetime="2021-04-01T23:24:05+08:00">2021-04-01</time>
+                <time title="Modified: 2021-04-01 23:36:19" itemprop="dateModified" datetime="2021-04-01T23:36:19+08:00">2021-04-01</time>
               </span>
 
           
@@ -617,8 +619,11 @@
 <h3 id="1-push-3-pop"><a href="#1-push-3-pop" class="headerlink" title="1 push, 3 pop"></a>1 push, 3 pop</h3><p>在使用 rwlock 时，对这种场景的性能测试没有什么意义。</p>
 <h2 id="atomic"><a href="#atomic" class="headerlink" title="atomic"></a>atomic</h2><h3 id="bus-加锁"><a href="#bus-加锁" class="headerlink" title="bus 加锁"></a>bus 加锁</h3><p>一个 lock# 信号，expensive。其他核也不能用了。</p>
 <h3 id="cache-加锁"><a href="#cache-加锁" class="headerlink" title="cache 加锁"></a>cache 加锁</h3><p>锁 cache line，需要处理器支持。</p>
-<h2 id="memory-barrier"><a href="#memory-barrier" class="headerlink" title="memory barrier"></a>memory barrier</h2><p>一个 lock-free 的 ringbuffer，对于 write_index 和 read_index 的更新。每次往里写数据与更新 write_index，可能被优化为乱序执行，先把 write_index 给更新了再写数据，导致读取到了错误的东西。</p>
-<p>这种乱序执行，编译器优化、CPU 流水线重排都会导致它的产生，这时候就需要 memory barrier 进行辅助。</p>
+<h2 id="memory-barrier"><a href="#memory-barrier" class="headerlink" title="memory barrier"></a>memory barrier</h2><h3 id="Sequential-Consistency"><a href="#Sequential-Consistency" class="headerlink" title="Sequential Consistency"></a>Sequential Consistency</h3><p>一个 lock-free 的 ringbuffer，对于 write_index 和 read_index 的更新。每次往里写数据与更新 write_index，可能被优化为乱序执行，先把 write_index 给更新了再写数据，导致读取到了错误的东西。</p>
+<p>这种乱序执行，编译器优化（Optimization Barrier）、CPU 流水线重排（Memory Barrier）都会导致它的产生，这时候就需要 memory barrier 进行辅助。volatile 并不保证原子性，也不能阻止编译器乱序，只能说都要从内存读。</p>
+<h3 id="Cache-Coherence"><a href="#Cache-Coherence" class="headerlink" title="Cache Coherence"></a>Cache Coherence</h3><p><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/MESI_protocol">MESI基础知识</a>。通过 MESI 协议来保证 cache coherence，分为 cache line 的 invalid 和 reload 两个操作。由硬件完成，软件层不需过多关注。</p>
+<h3 id="Store-Barrier-Load-Barrier-Full-Barrier"><a href="#Store-Barrier-Load-Barrier-Full-Barrier" class="headerlink" title="Store Barrier, Load Barrier, Full Barrier"></a>Store Barrier, Load Barrier, Full Barrier</h3><p>Load-Store, Store-Load, Load-Load, Store-Store</p>
+<p>Load 会阻塞直到所有 invalid 的 cache line 更新。Store 会阻塞直到向其他核发送的所有 invalid 信号完成。</p>
 <h2 id="CAS"><a href="#CAS" class="headerlink" title="CAS"></a>CAS</h2><p>最经典的 ABA 问题。</p>
 
       
