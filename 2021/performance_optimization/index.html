@@ -28,7 +28,7 @@
 <meta property="og:description" content="C++ 程序员，比起其他的程序员，可能骨子里更喜欢“性能”这个词。毕竟 C++ 难写又难编，包管理一塌糊涂。部署更是离谱，还要看 glibc 的版本（Java: 你在说啥）。所以“性能”二字便成为了一个类似遮羞布的存在了，哈哈。 lock free 被作为一种性能优化技术提出，主要是因为 mutex lock&#x2F;unlock 时，会有 sys call，如果没有获取到锁，则会让线程让出 CPU 导致">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2021-03-04T15:07:26.000Z">
-<meta property="article:modified_time" content="2021-04-01T15:46:36.095Z">
+<meta property="article:modified_time" content="2021-04-01T15:54:06.420Z">
 <meta property="article:author" content="Zengyu Zeng">
 <meta name="twitter:card" content="summary">
 
@@ -180,7 +180,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-04-01 23:46:36" itemprop="dateModified" datetime="2021-04-01T23:46:36+08:00">2021-04-01</time>
+                <time title="Modified: 2021-04-01 23:54:06" itemprop="dateModified" datetime="2021-04-01T23:54:06+08:00">2021-04-01</time>
               </span>
 
           
@@ -221,8 +221,8 @@
 <p>更严重的是，经常有人上层做一个 vector 或者 shared_ptr，避免内存泄漏。但是下层接数据的函数参数又给写成了指针。那么传的时候，要么 vector.data()，要么 shared_ptr.get()。最后，一层层传下去的这个指针，指向的类早就析构掉了，而某个异步的回调还在用。这个指针指向的堆内存，可能还不会马上被其他 malloc 用掉，在一小段时间内是合法的，跑了一会儿后才飞掉。碰上这种垃圾代码导致的问题，自求多福吧。</p>
 <h3 id="降不下来的内存"><a href="#降不下来的内存" class="headerlink" title="降不下来的内存"></a>降不下来的内存</h3><p>内存碎片，是 libc 里的 ptmalloc 导致的。libc 的内存管理是 brk，把堆指针往上推，然后再从裸堆里分配内存给用户。如果最上面的内存还没被释放，又有新的请求进来，下面的空隙也塞不进这个请求的话，只能继续往上推，导致进程里 malloc 申请的内存和 Rss 实际占用的内存对不上，Rss 明显高于 malloc 申请的数量。解决方案自然是，要么换一个 malloc 实现，要么调优 ptmalloc 的参数。或者不用 malloc，直接用 mmap 来申请大块内存，自己做内存池。</p>
 <h3 id="cache-miss"><a href="#cache-miss" class="headerlink" title="cache miss"></a>cache miss</h3><p>在 perf 里面，一堆的物理内存 page fault 会直接把你程序的性能给拉下来。而到了 CPU cache 这个级别，cache line 一个 invalid 脏读驱逐也会影响到其他核的读取。比如，两个线程同时操作两个很相近的变量，你我此起彼伏的互相 invalid 对方核的 cache line，就会导致性能暴跌。解决也很简单：不让变量靠在一起就行了。</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// really slow when concurrency</span></span><br><span class="line"><span class="keyword">int32_t</span> task001;</span><br><span class="line"><span class="keyword">int32_t</span> task002;</span><br></pre></td></tr></table></figure>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// avoided invaliding cache line each other</span></span><br><span class="line"><span class="keyword">int32_t</span> task001 __attribute__ ((aligned(<span class="number">64</span>)));</span><br><span class="line"><span class="keyword">int32_t</span> task002 __attribute__ ((aligned(<span class="number">64</span>)));</span><br></pre></td></tr></table></figure>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// global variable to make it easier reproduce</span></span><br><span class="line"><span class="comment">// really slow when concurrency</span></span><br><span class="line"><span class="keyword">int32_t</span> task001;</span><br><span class="line"><span class="keyword">int32_t</span> task002;</span><br></pre></td></tr></table></figure>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// global variable to make it easier reproduce</span></span><br><span class="line"><span class="comment">// avoided invaliding cache line each other</span></span><br><span class="line"><span class="keyword">int32_t</span> task001 __attribute__ ((aligned(<span class="number">64</span>)));</span><br><span class="line"><span class="keyword">int32_t</span> task002 __attribute__ ((aligned(<span class="number">64</span>)));</span><br></pre></td></tr></table></figure>
 <h2 id="IO"><a href="#IO" class="headerlink" title="IO"></a>IO</h2><p>当涉及到 IO，很多东西就显得无趣起来了。一样，举个例子吧。</p>
 <h3 id="NON-BLOCKING"><a href="#NON-BLOCKING" class="headerlink" title="NON_BLOCKING"></a>NON_BLOCKING</h3><p>一开始，之前的老哥用现成的 libuv 来实现一个 http server，做一个特征提取服务。会有很多的 client 向 server 发起链接，发送一张图片后，server 对图片提取特征再返回给 client。起了若干个 worker 线程，经典的 one thread per connection，从 server socket 里捞链接出来读图片、提取特征、再返回。</p>
 <p>但是性能很差。</p>
