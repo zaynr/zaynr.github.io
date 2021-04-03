@@ -19,7 +19,7 @@
 <meta property="og:description" content="C++ 程序员，比起其他的程序员，可能骨子里更喜欢“性能”这个词。毕竟 C++ 难写又难编，包管理一塌糊涂。部署更是离谱，还要看 glibc 的版本（Java: 你在说啥）。所以“性能”二字便成为了一个类似遮羞布的存在了，哈哈。 lock free 被作为一种性能优化技术提出，主要是因为 mutex lock&#x2F;unlock 时，会有 sys call，如果没有获取到锁，则会让线程让出 CPU 导致">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2021-03-04T15:07:26.000Z">
-<meta property="article:modified_time" content="2021-04-01T15:54:06.420Z">
+<meta property="article:modified_time" content="2021-04-03T13:19:53.423Z">
 <meta property="article:author" content="Zengyu Zeng">
 <meta name="twitter:card" content="summary">
 
@@ -112,8 +112,8 @@
 <p>使用 perf 做热点分析，首先自然是对整个进程先做一遍 profile。之后，用 top 观察 cpu 使用率较高的线程，再 profile 对应的线程。<br>影响我们整个儿程序表现的，不一定是 CPU 最高的线程，除非你整个虚机（容器）的 CPU 资源已经被吃光了。自然是先从业务出发，核心的函数在哪里，整个流程需要调用的是什么东西。如果有锁的话，需要对持有锁的函数做 off-cpu 的分析，看都是什么样的调用栈进来的，对流程进行优化。</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># active rec</span></span><br><span class="line">perf record -g -ap <span class="variable">$pid</span> sleep 600</span><br><span class="line"></span><br><span class="line"><span class="comment"># show thread stastics</span></span><br><span class="line">top -Hp <span class="variable">$pid</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># record thread stastics</span></span><br><span class="line">perf record -g -t <span class="variable">$tid</span> -F 2000 sleep 600</span><br><span class="line"></span><br><span class="line"><span class="comment"># offcpu, perf probe --help</span></span><br><span class="line">perf probe -a futex</span><br><span class="line">perf probe -x /lib64/libc.so.6 malloc</span><br></pre></td></tr></table></figure>
 <p>平时常用的 perf 指令如上，一般是在 profile 了指定线程后，发现很多 malloc/futex 等等的调用，则可以继续使用 perf probe 插桩。通过指定桩的调用栈打点来确认这些桩点都是如何进来的，提供进一步优化的依据。</p>
-<h4 id="perf-调用栈相关知识"><a href="#perf-调用栈相关知识" class="headerlink" title="perf 调用栈相关知识"></a>perf 调用栈相关知识</h4><p>fp 就是 Frame Pointer，即 x86 中的 EBP 寄存器，fp 指向当前栈帧栈底地址，此地址保存着上一栈帧的 EBP 值，具体可参考此文章的介绍，根据 fp 就可以逐级回溯调用栈。然而这一特性是会被优化掉的，而且这还是 GCC 的默认行为，在不手动指定 -fno-omit-frame-pointer 时默认都会进行此优化，此时 EBP 被当作一般的通用寄存器使用，以此为依据进行栈回溯显然是错误的。不过尝试指定 -fno-omit-frame-pointer 后依然没法获取到正确的调用栈，根据 GCC 手册的说明，指定了此选项后也并不保证所有函数调用都会使用 fp…… 看来只有放弃使用 fp 进行回溯了。</p>
-<p>dwarf 是一种调试文件格式，GCC 编译时附加的 -g 参数生成的就是 dwarf 格式的调试信息，其中包括了栈回溯所需的全部信息，使用 libunwind 即可展开这些信息。dwarf 的进一步介绍可参考 “关于DWARF”，值得一提的是，GDB 进行栈回溯时使用的正是 dwarf 调试信息。实际测试表明使用 dwarf 可以很好的获取到准确的调用栈。</p>
+<h4 id="perf-调用栈相关知识"><a href="#perf-调用栈相关知识" class="headerlink" title="perf 调用栈相关知识"></a>perf 调用栈相关知识</h4><p>fp 就是 Frame Pointer，即 x86 中的 EBP 寄存器，fp 指向当前栈帧栈底地址，此地址保存着上一栈帧的 EBP 值，根据 fp 就可以逐级回溯调用栈。然而这一特性是会被优化掉的，而且这还是 GCC 的默认行为，在不手动指定 -fno-omit-frame-pointer 时默认都会进行此优化，此时 EBP 被当作一般的通用寄存器使用，以此为依据进行栈回溯显然是错误的。不过尝试指定 -fno-omit-frame-pointer 后依然没法获取到正确的调用栈，根据 GCC 手册的说明，指定了此选项后也并不保证所有函数调用都会使用 fp…… 看来只有放弃使用 fp 进行回溯了。</p>
+<p>dwarf 是一种调试文件格式，GCC 编译时附加的 -g 参数生成的就是 dwarf 格式的调试信息，其中包括了栈回溯所需的全部信息，使用 libunwind 即可展开这些信息。值得一提的是，GDB 进行栈回溯时使用的正是 dwarf 调试信息。实际测试表明使用 dwarf 可以很好的获取到准确的调用栈。</p>
 <p>最后 perf 还支持通过 lbr 获取调用栈，lbr 即 Last Branch Records，是较新的 Intel CPU 中提供的一组硬件寄存器，其作用是记录之前若干次分支跳转的地址，主要目的就是用来支持 perf 这类性能分析工具，其详细说明可参考 “An introduction to last branch records” &amp; “Advanced usage of last branch records”。此方法是性能与准确性最高的手段，然而它存在一个很大的局限性，由于硬件 Ring Buffer 寄存器的大小是有限的，lbr 能记录的栈深度也是有限的，具体值取决于特定 CPU 实现，一般就是 32 层，若超过此限制会得到错误的调用栈。</p>
 <p>实际测试下以上 3 种栈回溯方式得到的结果，测试程序是一个调用深度为 50 的简单程序，从 f0() 依次调用至 f50()。</p>
 <p>–call-graph fp：</p>
