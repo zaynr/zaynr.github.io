@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"zengzengyu.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="恒生用的系统大部分都是自己魔改过的东西, 比如从网页端操作数据库就需要先调用公司的网页框架 Jres, 将数据(包括请求的参数和要调用的功能号)通过 Filter 封装以后, 以 T2 协议向数据库中间件 Cres 发送. Cres 接收之后进行解包, 依据功能号调用对应的功能, 并将接收到的参数进行入参. 而 Cres 上的功能则由 Ares 编写. Ares 是一款 IDE, 代码编写主要是通">
+<meta property="og:type" content="website">
+<meta property="og:title" content="公司自用工具踩坑记录">
+<meta property="og:url" content="https://zengzengyu.com/archive/%E5%85%AC%E5%8F%B8%E8%87%AA%E7%94%A8%E5%B7%A5%E5%85%B7%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95.html">
+<meta property="og:site_name" content="Zengyu&#39;s Cottage">
+<meta property="og:description" content="恒生用的系统大部分都是自己魔改过的东西, 比如从网页端操作数据库就需要先调用公司的网页框架 Jres, 将数据(包括请求的参数和要调用的功能号)通过 Filter 封装以后, 以 T2 协议向数据库中间件 Cres 发送. Cres 接收之后进行解包, 依据功能号调用对应的功能, 并将接收到的参数进行入参. 而 Cres 上的功能则由 Ares 编写. Ares 是一款 IDE, 代码编写主要是通">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2016-08-23T12:07:25.000Z">
+<meta property="article:modified_time" content="2021-10-28T08:03:23.555Z">
+<meta property="article:author" content="Zengyu Zeng">
+<meta property="article:tag" content="Hundsun">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://zengzengyu.com/archive/%E5%85%AC%E5%8F%B8%E8%87%AA%E7%94%A8%E5%B7%A5%E5%85%B7%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : false,
+    lang   : 'en'
+  };
+</script>
+
+  <title>公司自用工具踩坑记录 | Zengyu's Cottage
+</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Zengyu's Cottage</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+  
+  
+
+          <div class="content page posts-expand">
+            
+
+    
+    
+    
+    <div class="post-block" lang="en">
+      <header class="post-header">
+
+<h1 class="post-title" itemprop="name headline">公司自用工具踩坑记录
+</h1>
+
+<div class="post-meta">
+  
+
+</div>
+
+</header>
+
+      
+      
+      
+      <div class="post-body">
+          <p>恒生用的系统大部分都是自己魔改过的东西, 比如从网页端操作数据库就需要先调用公司的网页框架 Jres, 将数据(包括请求的参数和要调用的功能号)通过 Filter 封装以后, 以 T2 协议向数据库中间件 Cres 发送. Cres 接收之后进行解包, 依据功能号调用对应的功能, 并将接收到的参数进行入参. 而 Cres 上的功能则由 Ares 编写. Ares 是一款 IDE, 代码编写主要是通过宏定义的伪代码, 然后拼接成 C++ 程序, 再用 NetBeans 传上服务器编译为 *.so 文件. 在服务器上修改 *_ar.xml 和 *_ls.xml 来对特定功能号的 component 进行路由规则制定和添加处理模块. 实习期间应该都会一直更新.</p>
+<a id="more"></a>
+<h2 id="Ares-方面"><a href="#Ares-方面" class="headerlink" title="Ares 方面"></a>Ares 方面</h2><hr>
+<h3 id="变量名未定义"><a href="#变量名未定义" class="headerlink" title="变量名未定义"></a>变量名未定义</h3><p>伪代码的问题, 因为是用类似于 <code>[结果集语句][select * from t_demo][t_demo]</code> 这种宏定义的东西拼接成 C 语言代码, 所以很容易出现变量名未定义的 Bug, 没办法, 只能慢慢看.</p>
+<h3 id="接口"><a href="#接口" class="headerlink" title="接口"></a>接口</h3><p>接口定义的参数分为三种: 标准字段, 对象类型, 参数组. 标准字段就是数据库的字段类型. 对象类型需要自己定义, 类似于 JavaBean, 里面包含的是标准字段, 通常将对象类型名取为 rows. 参数组类似于标准字段, 是规定了包含什么参数的一组字段. 如果是查询功能的话, 需要打开[返回结果集]功能, 就是 ResultSet. </p>
+<h2 id="Cres-方面"><a href="#Cres-方面" class="headerlink" title="Cres 方面"></a>Cres 方面</h2><hr>
+<h3 id="更改不生效"><a href="#更改不生效" class="headerlink" title="更改不生效"></a>更改不生效</h3><p>在从 NetBeans 上传源码并编译为 *.so 文件之后, 需要对 pub 进行重启, 否则无法调用更改后的功能.</p>
+<h2 id="Jres-方面"><a href="#Jres-方面" class="headerlink" title="Jres 方面"></a>Jres 方面</h2><hr>
+<h3 id="返回结果集解包"><a href="#返回结果集解包" class="headerlink" title="返回结果集解包"></a>返回结果集解包</h3><p>这个东西坑了我差不多一天… 接口定义的返回参数中, 标准字段对应的要么是 char, 要么是 Integer, 这些可以从其他代码中获知. 如果接口定义的返回参数多于一个, 就需要用 *DTO(extends BaseDTO) 来接收, 而如果是 rows 这种对象类型, 则对应的类型是 List<RowstypeDTO>. 比如我要查询的东西返回内容是:</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">row_count;</span><br><span class="line">rows[func_id, func_name, remark];</span><br><span class="line"></span><br><span class="line">ConnectTestDTO:</span><br><span class="line">Integer func_id;</span><br><span class="line"><span class="built_in">String</span> func_name, remark;</span><br></pre></td></tr></table></figure>
+<p>则对应的接收 DTO 应为:</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Integer rowCount;</span><br><span class="line">List&lt;ConnectTestDTO&gt; rows;</span><br></pre></td></tr></table></figure>
+<p>在 Java 中定义的变量名与 Ares 中的标准字段名对应是用驼峰替代下划线, 如 <code>funcName -&gt; func_name</code>.</p>
+
+      </div>
+      
+      
+      
+    </div>
+    
+
+    
+    
+    
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Ares-%E6%96%B9%E9%9D%A2"><span class="nav-number">1.</span> <span class="nav-text">Ares 方面</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%98%E9%87%8F%E5%90%8D%E6%9C%AA%E5%AE%9A%E4%B9%89"><span class="nav-number">1.1.</span> <span class="nav-text">变量名未定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A5%E5%8F%A3"><span class="nav-number">1.2.</span> <span class="nav-text">接口</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cres-%E6%96%B9%E9%9D%A2"><span class="nav-number">2.</span> <span class="nav-text">Cres 方面</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9B%B4%E6%94%B9%E4%B8%8D%E7%94%9F%E6%95%88"><span class="nav-number">2.1.</span> <span class="nav-text">更改不生效</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Jres-%E6%96%B9%E9%9D%A2"><span class="nav-number">3.</span> <span class="nav-text">Jres 方面</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%94%E5%9B%9E%E7%BB%93%E6%9E%9C%E9%9B%86%E8%A7%A3%E5%8C%85"><span class="nav-number">3.1.</span> <span class="nav-text">返回结果集解包</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Zengyu Zeng</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zengyu Zeng</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

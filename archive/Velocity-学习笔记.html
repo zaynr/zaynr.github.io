@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"zengzengyu.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Velocity 是一个类似于 Jsp 的语言, 可以在布局文件中嵌入 HTML 标签来绘制前端. 并且还能执行一些简单的脚本. 文件类型为 *.vm .">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Velocity 学习笔记">
+<meta property="og:url" content="https://zengzengyu.com/archive/Velocity-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0.html">
+<meta property="og:site_name" content="Zengyu&#39;s Cottage">
+<meta property="og:description" content="Velocity 是一个类似于 Jsp 的语言, 可以在布局文件中嵌入 HTML 标签来绘制前端. 并且还能执行一些简单的脚本. 文件类型为 *.vm .">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2016-08-22T11:32:20.000Z">
+<meta property="article:modified_time" content="2021-10-28T08:03:23.554Z">
+<meta property="article:author" content="Zengyu Zeng">
+<meta property="article:tag" content="Velocity">
+<meta property="article:tag" content="Java">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://zengzengyu.com/archive/Velocity-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : false,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Velocity 学习笔记 | Zengyu's Cottage
+</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Zengyu's Cottage</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+  
+  
+
+          <div class="content page posts-expand">
+            
+
+    
+    
+    
+    <div class="post-block" lang="en">
+      <header class="post-header">
+
+<h1 class="post-title" itemprop="name headline">Velocity 学习笔记
+</h1>
+
+<div class="post-meta">
+  
+
+</div>
+
+</header>
+
+      
+      
+      
+      <div class="post-body">
+          <p>Velocity 是一个类似于 Jsp 的语言, 可以在布局文件中嵌入 HTML 标签来绘制前端. 并且还能执行一些简单的脚本. 文件类型为 <code>*.vm</code> .</p>
+<a id="more"></a>
+<h2 id="注释"><a href="#注释" class="headerlink" title="注释"></a>注释</h2><hr>
+<p>Velocity 的注释分为两种, 单行注释以 <code>##</code> 打头, 多行注释为 <code>#* blablabla *#</code>, 也就是用 <code>#</code> 代替了 <code>/</code>.</p>
+<h2 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h2><hr>
+<p>Velocity 的引用分为三种: 变量, 属性, 方法. 有关引用的所有参数都被处理为了 String. 而显式的引用方式为加大括号, 例如 ${foo}. 还有一个引用方式为 “安静引用”, 即让变量初始值为空, 例子为 <code>$!foo</code> 或 <code>$!&#123;foo&#125;</code>. 而如果碰到需要使用和变量名相同的字符串时, 可以用反斜杠来转义, 例如 <code>\foo</code>.</p>
+<h3 id="变量"><a href="#变量" class="headerlink" title="变量"></a>变量</h3><p>Velocity 的变量使用其实就是引用, 从而将动态内容嵌入页面中. VTL, 即为”Velocity 模板语言”.</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#set( $foo = &quot;Velocity&quot; )</span></span><br></pre></td></tr></table></figure>
+<p>这就是一条典型的 VTL 语句. 对于 Velocity 来说, 所有的变量类型都为 String. 此处变量名为 foo, 而值被赋予之后, 即可使用了:</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line"><span class="comment">#set( $foo = &quot;Velocity&quot; )</span></span><br><span class="line">Hello <span class="variable">$foo</span> World!</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;html&gt;</span><br></pre></td></tr></table></figure>
+<p>有一点要注意的是, VTL 的变量名必须以字母开头.</p>
+<h3 id="属性"><a href="#属性" class="headerlink" title="属性"></a>属性</h3><p>因为 VTL 是与 Java 交互的, 很显然, 既然变量是引用对象, 自然就有属性这一说法, 例如 <code>$Employee.name</code>. 属性包括对象里的数据和方法.</p>
+<h3 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h3><p>也就是函数啦, 下面是一些实例:</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$customer</span>.getAddress()</span><br><span class="line"><span class="variable">$purchase</span>.getTotal()</span><br><span class="line"><span class="variable">$page</span>.setTitle( <span class="string">&quot;My Home Page&quot;</span> )</span><br><span class="line"><span class="variable">$person</span>.setAttributes( [<span class="string">&quot;Strange&quot;</span>, <span class="string">&quot;Weird&quot;</span>, <span class="string">&quot;Excited&quot;</span>] )</span><br></pre></td></tr></table></figure>
+<p>传参方式有点像 Json.</p>
+<h2 id="与-Java-交互"><a href="#与-Java-交互" class="headerlink" title="与 Java 交互"></a>与 Java 交互</h2><hr>
+<p>VTL 使用的数据类型也是 JavaBean, 下面是一个实例:</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$foo</span></span><br><span class="line"> </span><br><span class="line"><span class="variable">$foo</span>.getBar()</span><br><span class="line"><span class="comment">## is the same as</span></span><br><span class="line"><span class="variable">$foo</span>.Bar</span><br><span class="line"> </span><br><span class="line"><span class="variable">$data</span>.getUser(<span class="string">&quot;jon&quot;</span>)</span><br><span class="line"><span class="comment">## is the same as</span></span><br><span class="line"><span class="variable">$data</span>.User(<span class="string">&quot;jon&quot;</span>)</span><br><span class="line"> </span><br><span class="line"><span class="variable">$data</span>.getRequest().getServerName()</span><br><span class="line"><span class="comment">## is the same as</span></span><br><span class="line"><span class="variable">$data</span>.Request.ServerName</span><br><span class="line"><span class="comment">## is the same as</span></span><br><span class="line">$&#123;data.Request.ServerName&#125;</span><br></pre></td></tr></table></figure>
+<p>而从 Java 向 Velocity 传参时, 则使用 ModelMap:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RequestMapping(&quot;/test/test&quot;)</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">(ModelMap modelMap)</span></span>&#123;</span><br><span class="line">		test = <span class="keyword">new</span> ConnectTestDTO();</span><br><span class="line">		test.setRemark(<span class="string">&quot;test&quot;</span>);</span><br><span class="line">		modelMap.put(<span class="string">&quot;foo&quot;</span>, test);</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+<p>此时则向 model 中放入了键为 foo, 值为 test 的 ConnectTestDTO 对象.</p>
+<h2 id="指令"><a href="#指令" class="headerlink" title="指令"></a>指令</h2><hr>
+<p>VTL 里的指令也就相当于是内置函数了, 以下是几个常见指令:</p>
+<h3 id="set"><a href="#set" class="headerlink" title="#set"></a>#set</h3><p>没什么可说的, 也就是给变量赋值, 下面是一些实例:</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#set( $monkey = $bill ) ## variable reference</span></span><br><span class="line"><span class="comment">#set( $monkey.Friend = &quot;monica&quot; ) ## string literal</span></span><br><span class="line"><span class="comment">#set( $monkey.Blame = $whitehouse.Leak ) ## property reference</span></span><br><span class="line"><span class="comment">#set( $monkey.Plan = $spindoctor.weave($web) ) ## method reference</span></span><br><span class="line"><span class="comment">#set( $monkey.Number = 123 ) ##number literal</span></span><br><span class="line"><span class="comment">#set( $monkey.Say = [&quot;Not&quot;, $my, &quot;fault&quot;] ) ## ArrayList</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#set( $value = $foo + 1 )</span></span><br><span class="line"><span class="comment">#set( $value = $bar - 1 )</span></span><br><span class="line"><span class="comment">#set( $value = $foo * $bar )</span></span><br><span class="line"><span class="comment">#set( $value = $foo / $bar )</span></span><br></pre></td></tr></table></figure>
+<p>有一个很坑的地方是, 如果赋值语句的右值为空(null), 而左值之前已经被赋了其他值, 此时赋值语句并不会让左值的数据改变, 依然是原来的值(妈的智障). 当右值被双引号包围时, 会解析里面的变量名, 而单引号则直接引用, 如下:</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#set( $directoryRoot = &quot;www&quot; )</span></span><br><span class="line"><span class="comment">#set( $templateName = &quot;index.vm&quot; )</span></span><br><span class="line"><span class="comment">#set( $template = &quot;$directoryRoot/$templateName&quot; )</span></span><br><span class="line"><span class="variable">$template</span></span><br><span class="line"><span class="comment">#set( $foo = &quot;bar&quot; )</span></span><br><span class="line"><span class="variable">$foo</span></span><br><span class="line"><span class="comment">#set( $blargh = &#x27;$foo&#x27; )</span></span><br><span class="line"><span class="variable">$blargh</span></span><br><span class="line"></span><br><span class="line">output:</span><br><span class="line"><span class="comment">## template</span></span><br><span class="line">www/index.vm</span><br><span class="line"><span class="comment">## foo </span></span><br><span class="line">Bar</span><br><span class="line"><span class="comment">## blargh</span></span><br><span class="line"><span class="variable">$foo</span></span><br></pre></td></tr></table></figure>
+<h3 id="if-foreach"><a href="#if-foreach" class="headerlink" title="#if, #foreach"></a>#if, #foreach</h3><p>就跟字面意思一样, 一个是条件判断, 一个是循环. 和 #set 不同, 这俩都需要用 <code>#end</code> 来标示代码段的结束. 当然, 在条件判断处也支持逻辑符号使用.</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#set( $criteria = [&quot;name&quot;, &quot;address&quot;] )</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#foreach( $criterion in $criteria )</span></span><br><span class="line"> </span><br><span class="line">    <span class="comment">#set( $result = false )</span></span><br><span class="line">    <span class="comment">#set( $result = $query.criteria($criterion) )</span></span><br><span class="line"> </span><br><span class="line">    <span class="comment">#if( some_condition &amp;&amp; other_condition || !some_condition )</span></span><br><span class="line">        Query was successful</span><br><span class="line">    <span class="comment">#elseif( some_else_condition ) ## don&#x27;t mind, this is just a demo, lol.</span></span><br><span class="line">        blablabla</span><br><span class="line">    <span class="comment">#else</span></span><br><span class="line">        blablabla</span><br><span class="line">    <span class="comment">#end</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#end</span></span><br></pre></td></tr></table></figure>
+<h3 id="include-parse-stop"><a href="#include-parse-stop" class="headerlink" title="#include, #parse, #stop"></a>#include, #parse, #stop</h3><p>#include 就是来引入文件的啦, 可以引入多个文件, like this: <code>#include( &quot;greetings.txt&quot;, $seasonalstock )</code>, 而 #parse 则只能有一个参数, like this: <code>#parse( &quot;me.vm&quot; )</code>. #parse 的用处嘛, 就是宏展开啊.</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Count down.</span><br><span class="line"><span class="comment">#set( $count = 8 )</span></span><br><span class="line"><span class="comment">#parse( &quot;parsefoo.vm&quot; )</span></span><br><span class="line">All done with dofoo.vm!</span><br></pre></td></tr></table></figure>
+<p>parsefoo.vm:</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$count</span></span><br><span class="line"><span class="comment">#set( $count = $count - 1 )</span></span><br><span class="line"><span class="comment">#if( $count &gt; 0 )</span></span><br><span class="line">    <span class="comment">#parse( &quot;parsefoo.vm&quot; )</span></span><br><span class="line"><span class="comment">#else</span></span><br><span class="line">    All done with parsefoo.vm!</span><br><span class="line"><span class="comment">#end</span></span><br></pre></td></tr></table></figure>
+<p>#stop 则是调试用的(Oooo~, 在这停顿!).</p>
+<h3 id="macro"><a href="#macro" class="headerlink" title="#macro"></a>#macro</h3><p>类似于汇编的宏, 跟 #parse 差不多, 一个是引用文件外的, 一个是引用文件内的. 代码段结尾需要 #end 标示.</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#macro( d )</span></span><br><span class="line">&lt;tr&gt;&lt;td&gt;&lt;/td&gt;&lt;/tr&gt;</span><br><span class="line"><span class="comment">#end</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#macro( tablerows $color $somelist )</span></span><br><span class="line"><span class="comment">#foreach( $something in $somelist )</span></span><br><span class="line">    &lt;tr&gt;&lt;td bgcolor=<span class="variable">$color</span>&gt;<span class="variable">$something</span>&lt;/td&gt;&lt;/tr&gt;</span><br><span class="line"><span class="comment">#end</span></span><br><span class="line"><span class="comment">#end</span></span><br><span class="line"></span><br><span class="line"><span class="comment">## call d:</span></span><br><span class="line"><span class="comment">#d()</span></span><br><span class="line"></span><br><span class="line"><span class="comment">## call tablerows:</span></span><br><span class="line"><span class="comment">#set( $greatlakes = [&quot;Superior&quot;,&quot;Michigan&quot;,&quot;Huron&quot;,&quot;Erie&quot;,&quot;Ontario&quot;] )</span></span><br><span class="line"><span class="comment">#set( $color = &quot;blue&quot; )</span></span><br><span class="line">&lt;table&gt;</span><br><span class="line">    <span class="comment">#tablerows( $color $greatlakes )</span></span><br><span class="line">&lt;/table&gt;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+      </div>
+      
+      
+      
+    </div>
+    
+
+    
+    
+    
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B3%A8%E9%87%8A"><span class="nav-number">1.</span> <span class="nav-text">注释</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%95%E7%94%A8"><span class="nav-number">2.</span> <span class="nav-text">引用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%98%E9%87%8F"><span class="nav-number">2.1.</span> <span class="nav-text">变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B1%9E%E6%80%A7"><span class="nav-number">2.2.</span> <span class="nav-text">属性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%B3%95"><span class="nav-number">2.3.</span> <span class="nav-text">方法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8E-Java-%E4%BA%A4%E4%BA%92"><span class="nav-number">3.</span> <span class="nav-text">与 Java 交互</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8C%87%E4%BB%A4"><span class="nav-number">4.</span> <span class="nav-text">指令</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#set"><span class="nav-number">4.1.</span> <span class="nav-text">#set</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#if-foreach"><span class="nav-number">4.2.</span> <span class="nav-text">#if, #foreach</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#include-parse-stop"><span class="nav-number">4.3.</span> <span class="nav-text">#include, #parse, #stop</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#macro"><span class="nav-number">4.4.</span> <span class="nav-text">#macro</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Zengyu Zeng</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zengyu Zeng</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
